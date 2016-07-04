@@ -60,6 +60,17 @@ public class JedisIndex {
 		return jedis.exists(redisKey);
 	}
 	
+/*
+========================================================================
+
+	These are fuctions to fill in:
+	- getURLS (term => set of URLS)
+	- getCounts (term => map(URL, termCounter))
+	- getCount ((URL, term) => int)
+	- indexPage (URL, Paragraphs)
+========================================================================
+*/
+
 	/**
 	 * Looks up a search term and returns a set of URLs.
 	 * 
@@ -67,22 +78,32 @@ public class JedisIndex {
 	 * @return Set of URLs.
 	 */
 	public Set<String> getURLs(String term) {
-        // FILL THIS IN!
-		return null;
+		System.out.println("getURLs");
+		//TODO: Filled in (Y)
+		Set<String> keyFields = jedis.hkeys(term);
+		return keyFields;
 	}
 
-    /**
+	/**
 	 * Looks up a term and returns a map from URL to count.
 	 * 
 	 * @param term
 	 * @return Map from URL to count.
 	 */
 	public Map<String, Integer> getCounts(String term) {
-        // FILL THIS IN!
-		return null;
+		System.out.println("getCounts");
+		//TODO: Filled in (Y)
+		
+		Map<String, Integer> outputMap = new HashMap<String, Integer>();
+		Set<String> urls = getURLs(term);
+		for (String url: urls) {
+			outputMap.put(url, getCount(url, term));
+		}
+		return outputMap;
+		
 	}
 
-    /**
+	/**
 	 * Returns the number of times the given term appears at the given URL.
 	 * 
 	 * @param url
@@ -90,8 +111,9 @@ public class JedisIndex {
 	 * @return
 	 */
 	public Integer getCount(String url, String term) {
-        // FILL THIS IN!
-		return null;
+		System.out.println("getCount");
+		//TODO: Filled in (Y)
+		return Integer.parseInt(jedis.hget(term, url));
 	}
 
 
@@ -102,9 +124,53 @@ public class JedisIndex {
 	 * @param paragraphs  Collection of elements that should be indexed.
 	 */
 	public void indexPage(String url, Elements paragraphs) {
-        // FILL THIS IN!
+		System.out.println("indexPage");
+		//TODO: Filled in (Y)
+
+		// make a TermCounter and count the terms in the paragraphs
+		TermCounter tc = new TermCounter(url);
+		tc.processElements(paragraphs);
+		
+		// for each term in the TermCounter, add the TermCounter to the index
+		for (String term: tc.keySet()) {
+			add(term, tc);
+		}
 	}
 
+
+/*
+========================================================================
+	suggested helper functions:
+========================================================================
+*/
+
+	/**
+	* Adds a URL to the set associated with `term`.
+	*/
+	public void add(String term, TermCounter tc) {
+		System.out.println("in add() " + term);
+		//TODO: Filled in (Y)
+		if (isIndexed(term)){
+			jedis.hincrBy(term, tc.getLabel(), 1);
+		}
+
+		jedis.hset(term, tc.getLabel(), Integer.toString(tc.get(term)));
+		
+		}
+
+	/**
+	* Pushes the contents of the TermCounter to Redis.
+	*/
+	public List<Object> pushTermCounterToRedis(TermCounter tc) {
+		//TODO: Fill this in!
+		return null;
+	}
+
+/*
+========================================================================
+	production testing methods 
+========================================================================
+*/
 	/**
 	 * Prints the contents of the index.
 	 * 

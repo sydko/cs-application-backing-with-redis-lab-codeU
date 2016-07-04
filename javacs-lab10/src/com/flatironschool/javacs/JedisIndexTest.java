@@ -33,7 +33,7 @@ public class JedisIndexTest {
 	public void setUp() throws Exception {
 		jedis = JedisMaker.make();
 		index = new JedisIndex(jedis);
-		
+		System.out.println("Calling loadIndex");
 		loadIndex(index);
 	}
 	
@@ -48,10 +48,12 @@ public class JedisIndexTest {
 
 		url1 = "https://en.wikipedia.org/wiki/Java_(programming_language)";
 		Elements paragraphs = wf.readWikipedia(url1);
+		System.out.println("indexing first link");
 		index.indexPage(url1, paragraphs);
 		
 		url2 = "https://en.wikipedia.org/wiki/Programming_language";
 		paragraphs = wf.readWikipedia(url2);
+		System.out.println("indexing second link");
 		index.indexPage(url2, paragraphs);
 	}
 
@@ -68,6 +70,7 @@ public class JedisIndexTest {
 	 */
 	@Test
 	public void testGetCounts() {
+		System.out.println("testing");
 		Map<String, Integer> map = index.getCounts("the");
 		assertThat(map.get(url1), is(339));
 		assertThat(map.get(url2), is(264));
