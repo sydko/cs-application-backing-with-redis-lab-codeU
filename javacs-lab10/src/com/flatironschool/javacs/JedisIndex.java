@@ -80,7 +80,7 @@ public class JedisIndex {
 	public Set<String> getURLs(String term) {
 		System.out.println("getURLs");
 		//TODO: Filled in (Y)
-		Set<String> keyFields = jedis.hkeys(term);
+		Set<String> keyFields = jedis.smembers(urlSetKey(term));
 		return keyFields;
 	}
 
@@ -113,7 +113,10 @@ public class JedisIndex {
 	public Integer getCount(String url, String term) {
 		System.out.println("getCount");
 		//TODO: Filled in (Y)
-		return Integer.parseInt(jedis.hget(term, url));
+		String redisKey = termCounterKey(url);
+		String count = jedis.hget(redisKey, term);
+		// Integer.parseInt(jedis.hget(term, url))
+		return new Integer(count);
 	}
 
 
@@ -150,12 +153,13 @@ public class JedisIndex {
 	public void add(String term, TermCounter tc) {
 		System.out.println("in add() " + term);
 		//TODO: Filled in (Y)
-		if (isIndexed(term)){
-			jedis.hincrBy(term, tc.getLabel(), 1);
-		}
+		// if (isIndexed(term)){
+		// 	jedis.hincrBy(term, tc.getLabel(), 1);
+		// }
 
-		jedis.hset(term, tc.getLabel(), Integer.toString(tc.get(term)));
-		
+		// jedis.hset(term, tc.getLabel(), Integer.toString(tc.get(term)));
+		jedis.sadd(urlSetKey(term), tc.getLabel());
+
 		}
 
 	/**
